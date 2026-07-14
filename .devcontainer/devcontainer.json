@@ -1,0 +1,35 @@
+{
+  "name": "Partena — custom :8099 / client :8089",
+  "dockerComposeFile": "docker-compose.yml",
+  // VSCode attaches to the central instance; the client runs as a peer container
+  // (reach it via a second terminal: docker compose -p partena exec partena_client bash).
+  // Swap this one line to "partena_client" to attach to the customer side instead.
+  "service": "partena_custom",
+  "workspaceFolder": "/workspace",
+  "remoteUser": "odoo",
+  "shutdownAction": "stopCompose",
+  // Bring up the peer Odoo container + db too, not just the attached service.
+  "runServices": ["db", "partena_client", "partena_custom"],
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  "forwardPorts": [8089, 8090, 8099, 8100, 5432],
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "Anthropic.claude-code",
+        "dbaeumer.vscode-eslint",
+        "inferrinizzard.prettier-sql-vscode",
+        "esbenp.prettier-vscode",
+        "charliermarsh.ruff",
+        "redhat.vscode-xml"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
+        "python.terminal.activateEnvironment": false
+      }
+    }
+  }
+}

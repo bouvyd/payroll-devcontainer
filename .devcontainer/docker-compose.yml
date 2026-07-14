@@ -1,0 +1,115 @@
+# Multi-server Partena stack: two Odoo instances on a shared network + Postgres.
+#
+#   partena_client  — CUSTOMER instance   (addons: psbe-partena-standard)  :8089
+#   partena_custom  — CENTRAL instance    (addons: psbe-partena-20)        :8099
+#   db              — shared Postgres (separate database names, no collision)
+#
+# The client syncs to the central via an integration module; on the shared
+# network they resolve each other by service name (http://partena_custom:8099).
+# All host paths and ports come from ../.env.
+name: ${COMPOSE_PROJECT_NAME:-partena}
+
+# Shared definition for both Odoo services (same image, network, db, etc.).
+# Per-service blocks below add their own volumes, ports and config env.
+x-odoo-base: &odoo-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      PYTHON_BASE: ${PYTHON_BASE:-python:3.12-bookworm}
+      USER_UID: ${USER_UID:-1000}
+      USER_GID: ${USER_GID:-1000}
+  image: clodo-odoo:${ODOO_VERSION:-19.0}
+  depends_on:
+    db:
+      condition: service_healthy
+  dns:
+    - 8.8.8.8
+    - 8.8.4.4
+  networks:
+    - partena-net
+  # Provision deps (both containers) then idle; servers start on demand.
+  command: bash .devcontainer/container-init.sh
+
+x-odoo-env: &odoo-env
+  PGHOST: db
+  PGPORT: "5432"
+  PGUSER: ${DB_USER:-odoo}
+  PGPASSWORD: ${DB_PASSWORD:-odoo}
+  PGDATABASE: postgres
+
+services:
+  # --- CUSTOMER instance -----------------------------------------------------
+  partena_client:
+    <<: *odoo-base
+    volumes:
+      # The clodo workspace itself (devcontainer config, scripts, .mcp.json...)
+      - ${WORKSPACE:-..}:/workspace:rw
+      # Shared Odoo source repositories (read-write under src/).
+      - ${ODOO_SRC:?set ODOO_SRC in .env}:/workspace/src/odoo:rw
+      - ${ENTERPRISE_SRC:?set ENTERPRISE_SRC in .env}:/workspace/src/enterprise:rw
+      - ${DESIGN_THEMES_SRC:?set DESIGN_THEMES_SRC in .env}:/workspace/src/design-themes:rw
+      # Customer custom addons (psbe-partena-standard).
+      - ${PARTENA_STANDARD_SRC:?set PARTENA_STANDARD_SRC in .env}:/workspace/src/partena-standard:rw
+      # Share host Claude Code auth (not memories/history).
+      - ${HOME}/.claude.json:/home/odoo/.claude.json:rw
+      - ${HOME}/.claude/.credentials.json:/home/odoo/.claude/.credentials.json:rw
+      - ${HOME}/.claude/settings.json:/home/odoo/.claude/settings.json:rw
+    environment:
+      <<: *odoo-env
+      # Select this container's Odoo config (bare `odoo` reads ODOO_RC; the dev
+      # scripts read ODOO_LOCAL_CONF via _common.sh).
+      ODOO_RC: /workspace/.devcontainer/odoo.client.conf
+      ODOO_LOCAL_CONF: /workspace/.devcontainer/odoo.client.conf
+      # Default DB for bare ./scripts/start.sh and ./scripts/init-db.sh.
+      ODOO_DB: partena_client
+    ports:
+      - "${CLIENT_HTTP_PORT:-8089}:8089"
+      - "${CLIENT_GEVENT_PORT:-8090}:8090"
+
+  # --- CENTRAL / service-provider instance (VSCode attaches here) ------------
+  partena_custom:
+    <<: *odoo-base
+    volumes:
+      - ${WORKSPACE:-..}:/workspace:rw
+      - ${ODOO_SRC:?set ODOO_SRC in .env}:/workspace/src/odoo:rw
+      - ${ENTERPRISE_SRC:?set ENTERPRISE_SRC in .env}:/workspace/src/enterprise:rw
+      - ${DESIGN_THEMES_SRC:?set DESIGN_THEMES_SRC in .env}:/workspace/src/design-themes:rw
+      # Central custom addons (psbe-partena-20).
+      - ${PARTENA_CUSTOM_SRC:?set PARTENA_CUSTOM_SRC in .env}:/workspace/src/partena-custom:rw
+      - ${HOME}/.claude.json:/home/odoo/.claude.json:rw
+      - ${HOME}/.claude/.credentials.json:/home/odoo/.claude/.credentials.json:rw
+      - ${HOME}/.claude/settings.json:/home/odoo/.claude/settings.json:rw
+    environment:
+      <<: *odoo-env
+      ODOO_RC: /workspace/.devcontainer/odoo.custom.conf
+      ODOO_LOCAL_CONF: /workspace/.devcontainer/odoo.custom.conf
+      ODOO_DB: partena_custom
+    ports:
+      - "${CUSTOM_HTTP_PORT:-8099}:8099"
+      - "${CUSTOM_GEVENT_PORT:-8100}:8100"
+
+  db:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: ${DB_USER:-odoo}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-odoo}
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-odoo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - partena-net
+
+volumes:
+  pgdata:
+
+networks:
+  partena-net:
+    driver: bridge
