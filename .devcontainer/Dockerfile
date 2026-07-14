@@ -1,5 +1,5 @@
 # Odoo development image.
-# Python version is pinned to Odoo 19.0's primary supported target (3.12, the
+# Python version is pinned to Odoo master (20.0)'s primary supported target (3.12, the
 # "Noble" pins in requirements.txt). Built on Debian 12 (bookworm) so the
 # official wkhtmltopdf .deb installs cleanly.
 ARG PYTHON_BASE=python:3.12-bookworm
@@ -78,6 +78,20 @@ RUN set -eux; \
         > /etc/apt/sources.list.d/google-chrome.list; \
     apt-get update; \
     apt-get install -y --no-install-recommends google-chrome-stable; \
+    rm -rf /var/lib/apt/lists/*
+
+# --- Docker CLI (drive sibling compose containers via the mounted socket) -----
+# Only the client (docker-ce-cli + compose plugin) — the daemon is the host's,
+# reached through /var/run/docker.sock (bind-mounted in docker-compose.yml). Lets
+# an agent in one instance's container start/init/update the OTHER instance.
+RUN set -eux; \
+    install -m 0755 -d /etc/apt/keyrings; \
+    curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc; \
+    chmod a+r /etc/apt/keyrings/docker.asc; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" \
+        > /etc/apt/sources.list.d/docker.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin; \
     rm -rf /var/lib/apt/lists/*
 
 # --- Non-root user matching the host UID/GID ---------------------------------

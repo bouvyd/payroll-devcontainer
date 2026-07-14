@@ -5,3 +5,7 @@ watchdog         # file-watching for --dev=reload
 rlPyCairo        # reportlab renderPM backend (barcode / raster image rendering)
 websocket-client # needed for longpolling/bus websocket tests
 phonenumbers     # phone number validation, used by some modules but not pinned in requirements.txt
+paramiko
+geoip2
+pyjwt
+odoo_upgrade @ git+https://github.com/odoo/upgrade-util@master

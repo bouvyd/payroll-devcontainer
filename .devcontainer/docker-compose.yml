@@ -19,7 +19,7 @@ x-odoo-base: &odoo-base
       PYTHON_BASE: ${PYTHON_BASE:-python:3.12-bookworm}
       USER_UID: ${USER_UID:-1000}
       USER_GID: ${USER_GID:-1000}
-  image: clodo-odoo:${ODOO_VERSION:-19.0}
+  image: partena-odoo:${ODOO_VERSION:-20.0}
   depends_on:
     db:
       condition: service_healthy
@@ -43,14 +43,17 @@ services:
   partena_client:
     <<: *odoo-base
     volumes:
-      # The clodo workspace itself (devcontainer config, scripts, .mcp.json...)
+      # The partena workspace itself (devcontainer config, scripts, .mcp.json...)
       - ${WORKSPACE:-..}:/workspace:rw
       # Shared Odoo source repositories (read-write under src/).
       - ${ODOO_SRC:?set ODOO_SRC in .env}:/workspace/src/odoo:rw
       - ${ENTERPRISE_SRC:?set ENTERPRISE_SRC in .env}:/workspace/src/enterprise:rw
       - ${DESIGN_THEMES_SRC:?set DESIGN_THEMES_SRC in .env}:/workspace/src/design-themes:rw
-      # Customer custom addons (psbe-partena-standard).
-      - ${PARTENA_STANDARD_SRC:?set PARTENA_STANDARD_SRC in .env}:/workspace/src/partena-standard:rw
+      # Customer custom addons (psbe-partena-20 - for now?).
+      - ${PARTENA_CUSTOM_SRC:?set PARTENA_CUSTOM_SRC in .env}:/workspace/src/partena-standard:rw
+      # Host Docker socket: drive the sibling instance's container via
+      # ./scripts/dexec.sh (start/init/update the OTHER server from here).
+      - /var/run/docker.sock:/var/run/docker.sock
       # Share host Claude Code auth (not memories/history).
       - ${HOME}/.claude.json:/home/odoo/.claude.json:rw
       - ${HOME}/.claude/.credentials.json:/home/odoo/.claude/.credentials.json:rw
@@ -77,6 +80,9 @@ services:
       - ${DESIGN_THEMES_SRC:?set DESIGN_THEMES_SRC in .env}:/workspace/src/design-themes:rw
       # Central custom addons (psbe-partena-20).
       - ${PARTENA_CUSTOM_SRC:?set PARTENA_CUSTOM_SRC in .env}:/workspace/src/partena-custom:rw
+      # Host Docker socket: drive the sibling instance's container via
+      # ./scripts/dexec.sh (start/init/update the OTHER server from here).
+      - /var/run/docker.sock:/var/run/docker.sock
       - ${HOME}/.claude.json:/home/odoo/.claude.json:rw
       - ${HOME}/.claude/.credentials.json:/home/odoo/.claude/.credentials.json:rw
       - ${HOME}/.claude/settings.json:/home/odoo/.claude/settings.json:rw

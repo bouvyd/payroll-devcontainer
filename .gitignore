@@ -1,0 +1,12 @@
+# Logs
+logs/
+*.log
+
+# Per-instance Odoo runtime data (filestore, sessions, downloaded addons)
+.odoo/*/filestore/
+.odoo/*/sessions/
+.odoo/*/addons/
+
+# Python
+__pycache__/
+*.pyc

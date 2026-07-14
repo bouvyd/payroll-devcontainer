@@ -1,4 +1,4 @@
-# clodo — Odoo dev container (Partena multi-server)
+# partena — Odoo dev container (multi-server)
 
 This repo is a containerized Odoo development environment running **two** Odoo
 instances that sync with each other, plus a shared Postgres:
@@ -15,7 +15,7 @@ Both share the `db` Postgres and resolve each other by service name on the
 
 ## Layout (inside the container)
 - `/workspace` — this repo (scripts, devcontainer config, `.mcp.json`)
-- `/workspace/src/odoo` — Odoo community (rw mount, branch 19.0) — shared
+- `/workspace/src/odoo` — Odoo community (rw mount, branch master/20.0) — shared
 - `/workspace/src/enterprise` — Odoo enterprise (rw mount) — shared
 - `/workspace/src/design-themes` — design themes (rw mount) — shared
 - `/workspace/src/partena-custom` — central custom addons (only in `partena_custom`)
@@ -46,14 +46,20 @@ The scripts pick up the container's config automatically, and DB name defaults t
 ./scripts/init-db.sh partena_custom partena_custom   # one-time: create + install
 ./scripts/start.sh                                   # serve on http://localhost:8099
 ```
-For the **client** instance, open a second terminal into its container:
+Each server only sees its own custom repo, so client operations must run **in**
+the `partena_client` container. From the attached `partena_custom` container you
+drive it through `./scripts/dexec.sh` (uses the bind-mounted Docker socket — no
+second terminal needed):
 ```bash
-docker compose -p partena exec partena_client bash
-./scripts/init-db.sh partena_client <integration_module>
-./scripts/start.sh                                   # serve on http://localhost:8089
+./scripts/dexec.sh partena_client ./scripts/init-db.sh partena_client <integration_module>
+./scripts/dexec.sh partena_client ./scripts/start.sh          # serve on http://localhost:8089
+./scripts/dexec.sh partena_client ./scripts/run-tests.sh <module>
+./scripts/dexec.sh partena_client                            # drop into a shell
 ```
-Each server only sees its own custom repo; run the client server from inside
-`partena_client` (its addons aren't mounted in `partena_custom`, and vice versa).
+`dexec.sh <service> [cmd...]` runs any command in a sibling instance's container;
+it works in both directions (e.g. from `partena_client`, target `partena_custom`).
+This needs the Docker CLI + socket that the image/compose now provide — a change
+to those requires an image rebuild.
 
 ## Notes
 - Python is 3.12; dependency pins come from `src/odoo/requirements.txt`, baked
