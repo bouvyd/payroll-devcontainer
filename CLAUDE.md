@@ -7,8 +7,7 @@ instances that sync with each other, plus a shared Postgres:
   from `psbe-partena-20` (mounted at `src/partena-custom`). Serves **:8099**.
   VSCode attaches here by default, so you (Claude) normally run **inside** it.
 - **`partena_client`** — a CUSTOMER instance that syncs to the central via an
-  integration module. Custom addons from `psbe-partena-standard` (mounted at
-  `src/partena-standard`). Serves **:8089**. Runs as a peer container.
+  integration module. Custom addons from `psbe-partena-20` (mounted at `src/partena-custom`). Serves **:8089**. Runs as a peer container.
 
 Both share the `db` Postgres and resolve each other by service name on the
 `partena-net` network (e.g. `http://partena_custom:8099` from the client).
@@ -19,7 +18,6 @@ Both share the `db` Postgres and resolve each other by service name on the
 - `/workspace/src/enterprise` — Odoo enterprise (rw mount) — shared
 - `/workspace/src/design-themes` — design themes (rw mount) — shared
 - `/workspace/src/partena-custom` — central custom addons (only in `partena_custom`)
-- `/workspace/src/partena-standard` — customer custom addons (only in `partena_client`)
 - `/workspace/.odoo/{custom,client}` — per-instance filestore/sessions (persisted on host)
 - Python venv: `/opt/venv` (on PATH). `odoo` wrapper → `odoo-bin`, config from
   `$ODOO_RC` — set per container to `.devcontainer/odoo.custom.conf` or

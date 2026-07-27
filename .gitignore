@@ -13,3 +13,9 @@ __pycache__/
 
 # Node
 node_modules/
+
+# symlinks / nested repos (each has its own .git — tracked independently)
+/src/design-themes
+/src/odoo
+/src/enterprise
+/src/partena-custom

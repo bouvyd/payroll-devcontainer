@@ -17,8 +17,8 @@ for repo in odoo enterprise design-themes; do
     echo "!! WARNING: /workspace/src/${repo} is empty — check the path in .env" >&2
   fi
 done
-if [ ! -d /workspace/src/partena-standard ] && [ ! -d /workspace/src/partena-custom ]; then
-  echo "!! WARNING: no partena custom repo mounted — check PARTENA_*_SRC in .env" >&2
+if [ ! -d /workspace/src/partena-custom ]; then
+  echo "!! WARNING: no partena custom repo mounted — check PARTENA_CUSTOM_SRC in .env" >&2
 fi
 
 echo ">> Odoo version: $(odoo --version 2>/dev/null || echo '??')"

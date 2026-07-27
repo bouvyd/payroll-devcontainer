@@ -1,6 +1,6 @@
 # Multi-server Partena stack: two Odoo instances on a shared network + Postgres.
 #
-#   partena_client  — CUSTOMER instance   (addons: psbe-partena-standard)  :8089
+#   partena_client  — CUSTOMER instance   (addons: psbe-partena-20)  :8089
 #   partena_custom  — CENTRAL instance    (addons: psbe-partena-20)        :8099
 #   db              — shared Postgres (separate database names, no collision)
 #
@@ -50,7 +50,7 @@ services:
       - ${ENTERPRISE_SRC:?set ENTERPRISE_SRC in .env}:/workspace/src/enterprise:rw
       - ${DESIGN_THEMES_SRC:?set DESIGN_THEMES_SRC in .env}:/workspace/src/design-themes:rw
       # Customer custom addons (psbe-partena-20 - for now?).
-      - ${PARTENA_CUSTOM_SRC:?set PARTENA_CUSTOM_SRC in .env}:/workspace/src/partena-standard:rw
+      - ${PARTENA_CUSTOM_SRC:?set PARTENA_CUSTOM_SRC in .env}:/workspace/src/partena-custom:rw
       # Host Docker socket: drive the sibling instance's container via
       # ./scripts/dexec.sh (start/init/update the OTHER server from here).
       - /var/run/docker.sock:/var/run/docker.sock

@@ -10,7 +10,7 @@ mkdir -p /workspace/.odoo/client /workspace/.odoo/custom
 
 # Install the mounted custom repo's Python requirements. Only one of these is
 # mounted per container; the other path simply won't exist.
-for repo in partena-standard partena-custom; do
+for repo in partena-custom; do
   req="/workspace/src/${repo}/requirements.txt"
   if [ -f "${req}" ]; then
     echo ">> Installing requirements for ${repo}: ${req}"

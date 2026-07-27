@@ -12,7 +12,7 @@ plus a shared Postgres — modeling a customer that syncs to a central provider:
 - **`partena_custom`** — CENTRAL instance, custom addons from `psbe-partena-20`,
   serves **:8099**. VSCode attaches here (**Dev Containers: Reopen in Container**).
 - **`partena_client`** — CUSTOMER instance, custom addons from
-  `psbe-partena-standard`, serves **:8089**. Runs as a peer container.
+  `psbe-partena-custom`, serves **:8089**. Runs as a peer container.
 - A separate **`db`** Postgres container, networked to both (they resolve each
   other by service name on `partena-net`).
 - Shared repos mounted **read-write**: `odoo`, `enterprise`, `design-themes`;
@@ -27,8 +27,9 @@ plus a shared Postgres — modeling a customer that syncs to a central provider:
    cp .devcontainer/.env.example .devcontainer/.env   # (already filled in for this machine)
    ```
    Set `USER_UID`/`USER_GID` (`id -u`, `id -g`), the shared repo paths
-   (`ODOO_SRC`, `ENTERPRISE_SRC`, `DESIGN_THEMES_SRC`), and the two custom
-   repos (`PARTENA_STANDARD_SRC` → client, `PARTENA_CUSTOM_SRC` → central).
+   (`ODOO_SRC`, `ENTERPRISE_SRC`, `DESIGN_THEMES_SRC`), and the custom
+   repo (`PARTENA_CUSTOM_SRC` → central; contains both custom and client
+   modules).
 3. Vendor Odoo's dependency list into the build context:
    ```bash
    ./bin/sync-requirements.sh
