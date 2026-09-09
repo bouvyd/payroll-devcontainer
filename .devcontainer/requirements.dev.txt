@@ -9,3 +9,4 @@ paramiko
 geoip2
 pyjwt
 odoo_upgrade @ git+https://github.com/odoo/upgrade-util@master
+pdfminer

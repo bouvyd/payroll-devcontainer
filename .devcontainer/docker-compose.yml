@@ -28,6 +28,7 @@ x-odoo-base: &odoo-base
     - 8.8.4.4
   networks:
     - partena-net
+    - sftpnet
   # Provision deps (both containers) then idle; servers start on demand.
   command: bash .devcontainer/container-init.sh
 
@@ -119,3 +120,5 @@ volumes:
 networks:
   partena-net:
     driver: bridge
+  sftpnet:
+    external: true

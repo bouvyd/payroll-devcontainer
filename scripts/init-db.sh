@@ -19,6 +19,6 @@ setup_log "init-db" "${DB}"
 echo ">> Creating database '${DB}' (if needed) and installing '${MODULES}'"
 createdb "${DB}" 2>/dev/null || echo ">> database '${DB}' already exists"
 
-odoo -d "${DB}" -i "${MODULES}" --stop-after-init --without-demo=False \
+odoo -d "${DB}" -i "${MODULES}" --stop-after-init --without-demo=True \
   "${ADDONS_PATH_ARG[@]}"
 echo ">> Done. Start the server with:  ./scripts/start.sh ${DB}"
