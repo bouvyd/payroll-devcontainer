@@ -59,6 +59,19 @@ it works in both directions (e.g. from `partena_client`, target `partena_custom`
 This needs the Docker CLI + socket that the image/compose now provide — a change
 to those requires an image rebuild.
 
+## Stopping / wiping
+```bash
+./scripts/kill.sh          # stop the servers here AND in the sibling container
+./scripts/kill.sh --local  # this container only
+./scripts/kill.sh --all    # also kill a running run-tests.sh (skipped by default)
+./scripts/clean.sh         # drop every DB (bar postgres/template*) + empty logs/
+./scripts/clean.sh --force # ... disconnecting open sessions instead of failing
+```
+`clean.sh` asks for confirmation (`-y` to skip, required when not on a tty) and
+takes `--dbs-only` / `--logs-only`. Postgres and `/workspace/logs` are shared by
+both instances, so it wipes the client's databases too. Filestores under
+`.odoo/{custom,client}` are left alone.
+
 ## Notes
 - Python is 3.12; dependency pins come from `src/odoo/requirements.txt`, baked
   into the image. If those change, run `bin/sync-requirements.sh` on the host and
