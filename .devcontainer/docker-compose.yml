@@ -29,6 +29,9 @@ x-odoo-base: &odoo-base
   networks:
     - partena-net
     - sftpnet
+  # tini as PID 1 reaps orphaned processes (e.g. headless Chrome's children after
+  # a tour); without it they linger as zombies and can hang HttpCase teardown.
+  init: true
   # Provision deps (both containers) then idle; servers start on demand.
   command: bash .devcontainer/container-init.sh
 

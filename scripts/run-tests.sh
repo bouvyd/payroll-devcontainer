@@ -31,7 +31,7 @@ fi
 
 MODULES="$1"; shift
 DB="${TEST_DB:-test_${MODULES%%,*}}"
-
+PORT="8282"
 setup_log "run-tests" "${DB}"
 
 # Scope tests to the requested module(s) unless the caller passed --test-tags.
@@ -66,6 +66,7 @@ echo ">> Running tests ${EXTRA_TAGS[*]:-(all installed)} on '${DB}'..."
 set -x
 odoo \
   -d "${DB}" \
+  -p "${PORT}" \
   "${INSTALL_ARGS[@]}" \
   --test-enable \
   --stop-after-init \
