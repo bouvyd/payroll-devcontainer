@@ -28,7 +28,6 @@ x-odoo-base: &odoo-base
     - 8.8.4.4
   networks:
     - partena-net
-    - sftpnet
   # tini as PID 1 reaps orphaned processes (e.g. headless Chrome's children after
   # a tour); without it they linger as zombies and can hang HttpCase teardown.
   init: true
@@ -123,5 +122,3 @@ volumes:
 networks:
   partena-net:
     driver: bridge
-  sftpnet:
-    external: true

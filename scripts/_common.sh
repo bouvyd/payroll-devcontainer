@@ -3,13 +3,11 @@
 # Do not execute directly.
 
 # ---------------------------------------------------------------------------
-# Config: prefer a workspace-level odoo.conf if present.
+# Config: each container sets ODOO_LOCAL_CONF to its own committed config
+# (.devcontainer/odoo.{custom,client}.conf); that file becomes ODOO_RC for all
+# script invocations. Override ODOO_LOCAL_CONF for one invocation to use a
+# different conf (e.g. an alternate worktree/port) without touching the default.
 # ---------------------------------------------------------------------------
-# Copy odoo.conf.example → odoo.conf and edit freely (it is git-ignored).
-# That file overrides the image-level ODOO_RC for all script invocations.
-# Set ODOO_LOCAL_CONF to pick a different local conf file for one invocation
-# (e.g. odoo.worktree.conf to point ./src/custom at an alternate worktree/port
-# without touching the default dev config).
 _LOCAL_CONF="${ODOO_LOCAL_CONF:-/workspace/odoo.conf}"
 if [ -f "${_LOCAL_CONF}" ]; then
   export ODOO_RC="${_LOCAL_CONF}"
@@ -19,7 +17,7 @@ unset _LOCAL_CONF
 # ---------------------------------------------------------------------------
 # Addons path (escape hatch for one-off overrides)
 # ---------------------------------------------------------------------------
-# Preferred approach: set addons_path in /workspace/odoo.conf.
+# Preferred approach: set addons_path in the instance's conf file.
 # EXTRA_ADDONS_PATHS (comma-separated) appends on top for quick experiments
 # without touching the conf file.
 ADDONS_PATH_ARG=()
