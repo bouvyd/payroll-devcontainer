@@ -8,8 +8,7 @@ set -euo pipefail
 # Separate filestores/sessions for the two servers (shared /workspace mount).
 mkdir -p /workspace/.odoo/client /workspace/.odoo/custom
 
-# Install the mounted custom repo's Python requirements. Only one of these is
-# mounted per container; the other path simply won't exist.
+# Install the custom repo's Python requirements (same repo in both containers).
 for repo in partena-custom; do
   req="/workspace/src/${repo}/requirements.txt"
   if [ -f "${req}" ]; then
